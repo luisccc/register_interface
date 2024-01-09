@@ -64,6 +64,14 @@ module prim_subreg_arb #(
     // Unused wd - Prevent lint errors.
     logic [DW-1:0] unused_wd;
     assign unused_wd = wd;
+  end else if (SWACCESS == "W1SS") begin : gen_w1ss
+    // If SWACCESS is W1SS, writing is ilegal if the bit is set
+    assign wr_en   = (q == 1)? 0: we | de;
+    assign wr_data = (de ? d : q) | (we ? wd : '0);
+  end else if (SWACCESS == "W1CS") begin : gen_w1cs
+    // If SWACCESS is W1CS, writing is ilegal if the bit is 0
+    assign wr_en   = (q == 0)? 0: we | de;
+    assign wr_data = (de ? d : q) & (we ? ~wd : '1);
   end else begin : gen_hw
     assign wr_en   = de;
     assign wr_data = d;

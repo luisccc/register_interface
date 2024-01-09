@@ -36,6 +36,8 @@ class SwAccess(JsonEnum):
     RC = 7
     R0W1C = 8
     NONE = 9
+    W1SS = 10
+    W1CS = 11
 
 
 class HwAccess(JsonEnum):
@@ -60,8 +62,12 @@ SWACCESS_PERMITTED = {
               SwAccess.W1C,  SwWrAccess.WR,   SwRdAccess.NONE, False),  # noqa: E241
     'rw1s':  ("Read, Write with 1 sets",                                # noqa: E241
               SwAccess.W1S,  SwWrAccess.WR,   SwRdAccess.RD,   False),  # noqa: E241
+    'rw1ss':  ("Read, Write with 1 sets, sticky",                       # noqa: E241
+              SwAccess.W1SS,  SwWrAccess.WR,   SwRdAccess.RD,   False), # noqa: E241
     'rw1c':  ("Read, Write with 1 clears",                              # noqa: E241
               SwAccess.W1C,  SwWrAccess.WR,   SwRdAccess.RD,   False),  # noqa: E241
+    'rw1cs':  ("Read, Write with 1 clears, sticky",                     # noqa: E241
+              SwAccess.W1CS,  SwWrAccess.WR,   SwRdAccess.RD,   False), # noqa: E241
     'rw0c':  ("Read, Write with 0 clears",                              # noqa: E241
               SwAccess.W0C,  SwWrAccess.WR,   SwRdAccess.RD,   False),  # noqa: E241
     'wo':    ("Write Only",                                             # noqa: E241
@@ -89,7 +95,7 @@ class SWAccess:
     def dv_rights(self) -> str:
         if self.key in ['none', 'ro', 'rc']:
             return "RO"
-        elif self.key in ['rw', 'r0w1c', 'rw1s', 'rw1c', 'rw0c']:
+        elif self.key in ['rw', 'r0w1c', 'rw1s', 'rw1c', 'rw0c', 'rw1ss', 'rw1cs']:
             return "RW"
         else:
             assert self.key == 'wo'
