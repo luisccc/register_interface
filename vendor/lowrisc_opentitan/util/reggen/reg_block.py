@@ -13,6 +13,7 @@ from .field import Field
 from .signal import Signal
 from .lib import check_int, check_list, check_str_dict, check_str
 from .multi_register import MultiRegister
+from .special_multi_register import SpecialMultiRegister
 from .params import ReggenParams
 from .register import Register
 from .window import Window
@@ -119,13 +120,14 @@ class RegBlock:
             'reserved': self._handle_reserved,
             'skipto': self._handle_skipto,
             'window': self._handle_window,
-            'multireg': self._handle_multireg
+            'multireg': self._handle_multireg,
+            'specialmultireg': self._handle_specialmultireg
         }
 
         entry_type = 'register'
         entry_body = entry  # type: object
 
-        for t in ['reserved', 'skipto', 'window', 'multireg']:
+        for t in ['reserved', 'skipto', 'window', 'multireg', 'specialmultireg']:
             t_body = entry.get(t)
             if t_body is not None:
                 # Special entries look like { window: { ... } }, so if we
@@ -206,6 +208,29 @@ class RegBlock:
         self.all_regs.append(mr)
         self.entries.append(mr)
         self.offset = mr.next_offset(self._addrsep)
+
+    def _handle_specialmultireg(self, where: str, body: object) -> None:
+        smr = SpecialMultiRegister(self.offset,
+                           self._addrsep, self._reg_width, self._params, body)
+
+        for mr in smr.mregs:
+            for reg in mr.regs:
+                lname = reg.name.lower()
+                if lname in self.name_to_offset:
+                    raise ValueError('Multiregister {} (at offset {:#x}) expands '
+                                    'to a register with name {} (at offset '
+                                    '{:#x}), but this already names something at '
+                                    'offset {:#x}.'
+                                    .format(mr.reg.name, mr.reg.offset,
+                                            reg.name, reg.offset,
+                                            self.name_to_offset[lname]))
+                self._add_flat_reg(reg)
+                self.name_to_offset[lname] = reg.offset
+
+            self.multiregs.append(mr)
+            self.all_regs.append(mr)
+            self.entries.append(mr)
+            self.offset = mr.next_offset(self._addrsep)
 
     def add_register(self, reg: Register) -> None:
         assert reg.offset == self.offset
