@@ -303,6 +303,7 @@ class Register(RegBase):
                    creg_count: int,
                    regwen_multi: bool,
                    regwen_special_multi: bool,
+                   regwen_neg: bool,
                    compact: bool,
                    min_reg_idx: int,
                    max_reg_idx: int,
@@ -323,6 +324,9 @@ class Register(RegBase):
                                               self.regwen.rsplit("_", 1)[-1] if "_" in self.regwen else self.regwen, creg_idx)
         else:
             new_regwen = '{}_{}'.format(self.regwen, creg_idx)
+
+        if regwen_neg is True:
+            new_regwen = '~{}'.format(new_regwen)
 
         strip_field = creg_idx > 0
 

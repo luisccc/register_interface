@@ -39,6 +39,10 @@ OPTIONAL_FIELDS.update({
         'pb', "If true, regwen term increments"
         " along with current multireg count."
     ],
+    'regwen_neg': [
+        'pb', "If true, regwen implements an inverted"
+        " enable"
+    ],
     'compact': [
         'pb', "If true, allow multireg compacting."
         "If false, do not compact."
@@ -80,6 +84,9 @@ class MultiRegister(RegBase):
                                        .format(self.reg.name))
         self.special_regwen_multi = check_bool(rd.get('special_regwen_multi', False),
                                        'special_regwen_multi field of multireg {}'
+                                       .format(self.reg.name))
+        self.regwen_neg = check_bool(rd.get('regwen_neg', False),
+                                       'regwen_neg field of multireg {}'
                                        .format(self.reg.name))
 
         default_compact = True if len(self.reg.fields) == 1 else False
@@ -123,6 +130,7 @@ class MultiRegister(RegBase):
                                       creg_offset, creg_idx, creg_count,
                                       self.regwen_multi,
                                       self.special_regwen_multi,
+                                      self.regwen_neg,
                                       self.compact,
                                       min_reg_idx, max_reg_idx, self.cname)
             self.regs.append(reg)
